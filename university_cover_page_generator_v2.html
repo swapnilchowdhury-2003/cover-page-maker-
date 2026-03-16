@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoverCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f0f13;--surface:#18181f;--surface2:#22222c;--border:#2e2e3a;
+  --accent:#7b6ef6;--accent2:#a78bfa;--gold:#f0c060;
+  --text:#e8e8f0;--text-muted:#888899;--radius:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+header{padding:22px 32px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+.logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+header h1{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--text);}
+header span{font-size:0.78rem;color:var(--text-muted);margin-left:4px;}
+.main{display:grid;grid-template-columns:410px 1fr;gap:0;flex:1;min-height:0;height:calc(100vh - 70px);}
+.form-panel{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:22px 24px 40px;}
+.preview-panel{background:#1a1a24;display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;}
+.tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:20px;gap:4px;}
+.tab-btn{flex:1;padding:9px 14px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.2s;}
+.tab-btn.active{background:var(--accent);color:#fff;}
+.section-label{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin:18px 0 9px;}
+.field{margin-bottom:12px;}
+label{display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;font-weight:500;}
+input[type="text"],input[type="date"],select,textarea{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.86rem;outline:none;transition:border 0.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:60px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.logo-upload{border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border 0.2s,background 0.2s;position:relative;overflow:hidden;}
+.logo-upload:hover{border-color:var(--accent);background:rgba(123,110,246,0.05);}
+.logo-upload input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:24px;margin-bottom:4px;}
+.logo-upload p{font-size:0.78rem;color:var(--text-muted);}
+.logo-preview-img{max-height:60px;max-width:110px;margin:0 auto 4px;display:block;}
+.download-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#5b4cf0);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.93rem;font-weight:600;cursor:pointer;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s,transform 0.1s;}
+.download-btn:hover{opacity:0.9;transform:translateY(-1px);}
+.preview-label{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;align-self:flex-start;}
+.cover-wrap{width:100%;max-width:500px;background:#fff;border-radius:3px;box-shadow:0 20px 60px rgba(0,0,0,0.5);overflow:hidden;aspect-ratio:210/297;}
+#preview-iframe{width:100%;height:100%;border:none;display:block;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-mark">📄</div>
+  <div><h1>CoverCraft <span>— University Cover Page Generator</span></h1></div>
+</header>
+<div class="main">
+
+  <!-- FORM -->
+  <div class="form-panel">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setType('lab')">🔬 Lab Report</button>
+      <button class="tab-btn" onclick="setType('assignment')">📝 Assignment</button>
+    </div>
+
+    <div class="section-label">🏛 University Info</div>
+    <div class="field">
+      <label>University Logo</label>
+      <div class="logo-upload" id="logo-drop">
+        <input type="file" id="logo-input" accept="image/*" onchange="handleLogo(event)"/>
+        <div id="logo-preview-wrap">
+          <div class="upload-icon">🖼</div>
+          <p>Click to upload logo (PNG/JPG)</p>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>University Name</label><input type="text" id="uni-name" placeholder="e.g. Premier University" oninput="update()"/></div>
+    <div class="field"><label>University Tagline / Subtitle</label><input type="text" id="uni-tagline" placeholder="e.g. Center Of Excellence For Quality Learning" oninput="update()"/></div>
+    <div class="field"><label>Department Name</label><input type="text" id="dept-name" placeholder="e.g. Department of Computer Science and Engineering" oninput="update()"/></div>
+
+    <div class="section-label">📋 Report Details</div>
+    <div class="field"><label>Course Code</label><input type="text" id="course-code" placeholder="e.g. CSE 301" oninput="update()"/></div>
+    <div class="field"><label>Course Title</label><input type="text" id="course-title" placeholder="e.g. Data Structures and Algorithms" oninput="update()"/></div>
+    <div class="field"><label id="rn-label">Report / Assignment Name</label><input type="text" id="report-name" placeholder="e.g. Experiment #3 – Linked List" oninput="update()"/></div>
+    <div class="field"><label id="rno-label">Report No.</label><input type="text" id="report-no" placeholder="e.g. 03" oninput="update()"/></div>
+    <div class="two-col">
+      <div class="field"><label>Date of Submission</label><input type="date" id="date-sub" oninput="update()"/></div>
+      <div class="field"><label id="dp-label">Date of Performance</label><input type="date" id="date-perf" oninput="update()"/></div>
+    </div>
+
+    <div class="section-label">👨‍🏫 Submitted To</div>
+    <div class="field"><label>Teacher / Instructor Name</label><input type="text" id="teacher-name" placeholder="e.g. Dr. John Smith" oninput="update()"/></div>
+    <div class="field"><label>Designation</label><input type="text" id="teacher-desig" placeholder="e.g. Associate Professor" oninput="update()"/></div>
+
+    <div class="section-label">🎓 Submitted By</div>
+    <div class="field"><label>Student Name</label><input type="text" id="stu-name" placeholder="e.g. Jane Doe" oninput="update()"/></div>
+    <div class="two-col">
+      <div class="field"><label>Student ID</label><input type="text" id="stu-id" placeholder="e.g. 0112310041" oninput="update()"/></div>
+      <div class="field"><label>Section</label><input type="text" id="stu-sec" placeholder="e.g. B" oninput="update()"/></div>
+    </div>
+    <div class="two-col">
+      <div class="field"><label>Semester</label><input type="text" id="stu-sem" placeholder="e.g. 6th" oninput="update()"/></div>
+      <div class="field"><label>Batch</label><input type="text" id="stu-batch" placeholder="e.g. 52nd" oninput="update()"/></div>
+    </div>
+    <div class="field"><label>Program</label><input type="text" id="stu-prog" placeholder="e.g. B.Sc. in CSE" oninput="update()"/></div>
+
+    <button class="download-btn" onclick="downloadPDF()">⬇ Download PDF</button>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview</div>
+    <div class="cover-wrap">
+      <iframe id="preview-iframe" title="Cover Preview"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+let coverType = 'lab';
+let logoDataUrl = null;
+
+function setType(t) {
+  coverType = t;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&t==='lab')||(i===1&&t==='assignment'));
+  });
+  // Update labels
+  document.getElementById('rn-label').textContent = t==='lab' ? 'Report Name' : 'Assignment Title';
+  document.getElementById('rno-label').textContent = t==='lab' ? 'Report No.' : 'Assignment No.';
+  document.getElementById('dp-label').textContent = t==='lab' ? 'Date of Performance' : 'Due Date';
+  update();
+}
+
+function handleLogo(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    logoDataUrl = ev.target.result;
+    const wrap = document.getElementById('logo-preview-wrap');
+    wrap.innerHTML = `<img class="logo-preview-img" src="${logoDataUrl}" alt="logo"/>`;
+    update();
+  };
+  reader.readAsDataURL(file);
+}
+
+function v(id){ return (document.getElementById(id)||{}).value||''; }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d){
+  if(!d) return '';
+  const [y,m,dd]=d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+function buildCoverDoc() {
+  const uniName  = esc(v('uni-name'))    || 'University Name';
+  const uniTag   = esc(v('uni-tagline')) || '';
+  const dept     = esc(v('dept-name'))   || 'Department';
+  const cc       = esc(v('course-code'));
+  const ct       = esc(v('course-title'));
+  const rn       = esc(v('report-name'));
+  const rno      = esc(v('report-no'));
+  const ds       = fmtDate(v('date-sub'));
+  const dp       = fmtDate(v('date-perf'));
+  const tname    = esc(v('teacher-name'));
+  const tdesig   = esc(v('teacher-desig'));
+  const sname    = esc(v('stu-name'));
+  const sid      = esc(v('stu-id'));
+  const ssec     = esc(v('stu-sec'));
+  const ssem     = esc(v('stu-sem'));
+  const sbatch   = esc(v('stu-batch'));
+  const sprog    = esc(v('stu-prog'));
+
+  const isLab    = coverType==='lab';
+  const typeLbl  = isLab ? 'Lab Report' : 'Assignment';
+  const repNoLbl = isLab ? 'REPORT NO.' : 'ASSIGNMENT NO.';
+  const repNmLbl = isLab ? 'REPORT NAME' : 'ASSIGNMENT TITLE';
+  const perfLbl  = isLab ? 'DATE OF PERFORMANCE' : 'DUE DATE';
+
+  const logoHtml = logoDataUrl
+    ? `<img src="${logoDataUrl}" style="max-height:80px;max-width:110px;object-fit:contain;display:block;margin:0 auto;"/>`
+    : `<div style="width:80px;height:80px;border:2px dashed #ccc;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:10px;margin:0 auto;">LOGO</div>`;
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 210mm; background: #fff; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    color: #111;
+    padding: 18mm 18mm 14mm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 297mm;
+  }
+  .uni-name { font-size: 26pt; font-weight: 700; color: #1a3a8f; text-align: center; line-height: 1.2; }
+  .uni-sub  { font-size: 10pt; font-weight: 600; font-style: italic; color: #333; text-align: center; margin-top: 3px; }
+  .logo-wrap { margin: 10px 0 8px; }
+  .dept     { font-size: 12pt; font-weight: 700; font-style: italic; text-decoration: underline; text-align: center; margin-top: 10px; }
+  .badge    { display: inline-block; background: #1a3a8f; color: #fff; font-size: 10pt; font-weight: 700;
+              padding: 5px 26px; margin: 12px 0 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .info-box { width: 100%; border: 1.5px solid #333; margin-bottom: 10px; border-collapse: collapse; }
+  .info-box td { border: 1px solid #ccc; padding: 6px 9px; font-size: 10pt; vertical-align: middle; }
+  .info-box .key { font-weight: 700; width: 140px; border-right: 1.5px solid #555; background: #f9f9f9; white-space: nowrap; }
+  .bottom { width: 100%; display: flex; gap: 10px; flex: 1; }
+  .box { border: 1.5px solid #333; padding: 9px 11px; flex: 1; font-size: 9.5pt; }
+  .box-title { font-weight: 700; text-decoration: underline; font-size: 10.5pt; margin-bottom: 8px; }
+  .by-row { display: flex; border-bottom: 1px solid #ddd; padding: 3px 0; }
+  .by-row:last-child { border-bottom: none; }
+  .by-key { font-weight: 700; min-width: 80px; }
+  .remarks-space { margin-top: 8px; border-top: 1px solid #ddd; height: 50px; }
+  @media print {
+    html, body { width: 210mm; }
+    @page { size: A4; margin: 0; }
+    body { padding: 18mm 18mm 14mm; }
+  }
+</style>
+</head>
+<body>
+  <div class="uni-name">${uniName}</div>
+  ${uniTag ? `<div class="uni-sub">${uniTag}</div>` : ''}
+  <div class="logo-wrap">${logoHtml}</div>
+  <div class="dept">${dept}</div>
+  <div class="badge">${typeLbl}</div>
+
+  <table class="info-box" style="width:100%">
+    <tr><td class="key">COURSE CODE</td><td>${cc}</td></tr>
+    <tr><td class="key">COURSE TITLE</td><td>${ct}</td></tr>
+    <tr><td class="key">${repNmLbl}</td><td>${rn}</td></tr>
+    <tr>
+      <td class="key">${repNoLbl}</td>
+      <td>
+        <span>${rno}</span>
+        <span style="float:right;font-size:9pt">
+          <b>DATE OF SUBMISSION:</b> ${ds}&nbsp;&nbsp;&nbsp;
+          <b>${perfLbl}:</b> ${dp}
+        </span>
+      </td>
+    </tr>
+  </table>
+
+  <div class="bottom">
+    <div class="box" style="flex:1.1">
+      <div class="box-title">SUBMITTED TO</div>
+      <div style="line-height:1.7">${tname ? `<b>${tname}</b>` : '&nbsp;'}<br/>${tdesig || ''}</div>
+      <div style="margin-top:20px">
+        <div class="box-title">REMARKS:</div>
+        <div class="remarks-space"></div>
+      </div>
+    </div>
+    <div class="box" style="flex:1.5">
+      <div class="box-title">SUBMITTED BY:</div>
+      <div class="by-row"><div class="by-key">NAME</div><div>${sname}</div></div>
+      <div class="by-row"><div class="by-key">ID</div><div>${sid}</div></div>
+      <div class="by-row"><div class="by-key">SECTION</div><div>${ssec}</div></div>
+      <div class="by-row"><div class="by-key">SEMESTER</div><div>${ssem}</div></div>
+      <div class="by-row"><div class="by-key">BATCH</div><div>${sbatch}</div></div>
+      <div class="by-row"><div class="by-key">PROGRAM</div><div>${sprog}</div></div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function update() {
+  const iframe = document.getElementById('preview-iframe');
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(buildCoverDoc());
+  doc.close();
+}
+
+function downloadPDF() {
+  const uniName  = v('uni-name') || 'Cover';
+  const typeLbl  = coverType==='lab' ? 'Lab_Report' : 'Assignment';
+  const filename = uniName.replace(/\s+/g,'_') + '_' + typeLbl + '_Cover';
+
+  // Open in new window and trigger print → Save as PDF
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Please allow popups for this site, then try again.\n\nAlternatively: right-click the preview → Print → Save as PDF.');
+    return;
+  }
+  win.document.open();
+  win.document.write(buildCoverDoc());
+  win.document.close();
+  win.document.title = filename;
+  // Wait for images to load then print
+  win.onload = () => {
+    setTimeout(() => {
+      win.focus();
+      win.print();
+    }, 600);
+  };
+  // Fallback if onload already fired
+  setTimeout(() => {
+    try { win.focus(); win.print(); } catch(e){}
+  }, 1200);
+}
+
+// Init
+update();
+</script>
+</body>
+</html>
